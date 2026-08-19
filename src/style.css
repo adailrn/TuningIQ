@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+body {
+    font-family: 'JetBrains Mono', monospace;
+    background-color: #0d0e12;
+    color: #8b8d96;
+    margin: 0;
+    padding: 40px;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.header {
+    margin-bottom: 30px;
+    margin-top: 50px;
+}
+
+.header:first-of-type {
+    margin-top: 0;
+}
+
+.header h1 {
+    color: #d1d2d5;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #62646c;
+    font-weight: 400;
+}
+
+.dot {
+    width: 16px;
+    height: 6px;
+    border-radius: 3px;
+}
+
+.sub-text {
+    font-size: 10px;
+    color: #62646c;
+}
+
+.card {
+    background-color: #121318;
+    border: 1px solid #23252a;
+    border-radius: 8px;
+    padding: 20px 30px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.card-title {
+    color: #d1d2d5;
+    font-size: 14px;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sample-count {
+    color: #62646c;
+}
+
+.plot-container {
+    width: 100%;
+    height: 200px;
+}
+
+.plot-container.tall {
+    height: 350px;
+}
+
+.input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+input[type="file"],
+input[type="password"] {
+    color: #8b8d96;
+    background: #121318;
+    border: 1px solid #23252a;
+    padding: 10px;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+input[type="file"] {
+    flex: 1;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    background: #23252a;
+    color: #d1d2d5;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    margin-right: 15px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+input[type="password"] {
+    flex: 1;
+}
+
+input[type="password"]::placeholder {
+    color: #62646c;
+    text-transform: uppercase;
+}
+
+.gemini-output {
+    color: #8b8d96;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.status-indicator {
+    color: #2979ff;
+    font-style: italic;
+}

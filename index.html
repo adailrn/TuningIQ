@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Telemetry Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="src/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-group">
+            <input type="file" id="csvFileInput" />
+            <input type="password" id="geminiApiKey" placeholder="ENTER GEMINI API KEY" />
+        </div>
+
+        <div class="header">
+            <h1>TRACK MAP
+                <span class="legend">
+                    <div class="dot" style="background-color: #2979ff;"></div> CORNERING
+                    <div class="dot" style="background-color: #d95829;"></div> STRAIGHT
+                </span>
+            </h1>
+            <div class="sub-text">GPS SCATTER PLOT • 1:1 ASPECT RATIO • YAW HYSTERESIS ISOLATION</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">GPS TRACE</span>
+                <span class="sample-count" id="trackMapSamples">0 samples</span>
+            </div>
+            <div id="trackMapPlot" class="plot-container tall"></div>
+        </div>
+
+        <div class="header">
+            <h1>TIRE TEMPERATURE
+                <span class="legend">
+                    <div class="dot" style="background-color: #2979ff;"></div> CORNERING
+                    <div class="dot" style="background-color: #d95829;"></div> STRAIGHT
+                    <div class="dot" style="background-color: rgba(217, 88, 41, 0.4);"></div> TARGET
+                </span>
+            </h1>
+            <div class="sub-text">DYNAMIC TARGET EXTRACTION VIA TIRE COMBINED SLIP ISOLATION • 5% ELITE GRIP BRACKET •
+                Q1-Q3 QUARTILE BOUNDS • SEGREGATED VECTOR ISOLATION</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT (CORNERING)</span>
+                <span class="sample-count" id="frontTempCorneringSamples">0 samples</span>
+            </div>
+            <div id="frontTempCorneringPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR (CORNERING)</span>
+                <span class="sample-count" id="rearTempCorneringSamples">0 samples</span>
+            </div>
+            <div id="rearTempCorneringPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT (STRAIGHT)</span>
+                <span class="sample-count" id="frontTempStraightSamples">0 samples</span>
+            </div>
+            <div id="frontTempStraightPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR (STRAIGHT)</span>
+                <span class="sample-count" id="rearTempStraightSamples">0 samples</span>
+            </div>
+            <div id="rearTempStraightPlot" class="plot-container"></div>
+        </div>
+
+        <div class="header">
+            <h1>SUSPENSION TRAVEL
+                <span class="legend">
+                    <div class="dot" style="background-color: #2979ff;"></div> CORNERING
+                    <div class="dot" style="background-color: #d95829;"></div> STRAIGHT
+                </span>
+            </h1>
+            <div class="sub-text">DYNAMIC SEGREGATION YAW HYSTERESIS (ENTRY: 0.40 / EXIT: 0.15) • [0, 1] • 20 BINS</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT (CORNERING)</span>
+                <span class="sample-count" id="frontCorneringSamples">0 samples</span>
+            </div>
+            <div id="frontCorneringPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR (CORNERING)</span>
+                <span class="sample-count" id="rearCorneringSamples">0 samples</span>
+            </div>
+            <div id="rearCorneringPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT (STRAIGHT)</span>
+                <span class="sample-count" id="frontStraightSamples">0 samples</span>
+            </div>
+            <div id="frontStraightPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR (STRAIGHT)</span>
+                <span class="sample-count" id="rearStraightSamples">0 samples</span>
+            </div>
+            <div id="rearStraightPlot" class="plot-container"></div>
+        </div>
+
+        <div class="header">
+            <h1>DAMPER VELOCITY
+                <span class="legend">
+                    <div class="dot" style="background-color: #d95829;"></div> BUMP (COMPRESSION)
+                    <div class="dot" style="background-color: #2979ff;"></div> REB (EXTENSION)
+                </span>
+            </h1>
+            <div class="sub-text">BUMP: POSITIVE | REBOUND: NEGATIVE • 30 MM/S THRESHOLD • TIME-IN-ZONE DISTRIBUTION •
+                40 BINS</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT</span>
+                <span class="sample-count" id="frontDamperSamples">0 samples</span>
+            </div>
+            <div id="frontDamperPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR</span>
+                <span class="sample-count" id="rearDamperSamples">0 samples</span>
+            </div>
+            <div id="rearDamperPlot" class="plot-container"></div>
+        </div>
+
+        <div class="header">
+            <h1>DIFFERENTIAL LOCK <span class="legend">
+                    <div class="dot" style="background-color: #d95829;"></div> ACCELERATION (EXIT)
+                </span></h1>
+            <div class="sub-text">NORMALIZED WHEEL SPEEDS • F/R TARGET: P95 0.08-0.18 • CENTER TARGET: DIRECTIONAL MEAN
+                • 20 BINS</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT AXLE (Δ LR)</span>
+                <span class="sample-count" id="accelFrontDiffSamples">0 samples</span>
+            </div>
+            <div id="accelFrontDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR AXLE (Δ LR)</span>
+                <span class="sample-count" id="accelRearDiffSamples">0 samples</span>
+            </div>
+            <div id="accelRearDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">CENTER DIFF (Δ FR)</span>
+                <span class="sample-count" id="accelCenterDiffSamples">0 samples</span>
+            </div>
+            <div id="accelCenterDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="header">
+            <h1>DIFFERENTIAL LOCK <span class="legend">
+                    <div class="dot" style="background-color: #2979ff;"></div> DECELERATION (ENTRY)
+                </span></h1>
+            <div class="sub-text">NORMALIZED WHEEL SPEEDS • F/R TARGET: P95 0.08-0.18 • CENTER TARGET: DIRECTIONAL MEAN
+                • 20 BINS</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">FRONT AXLE (Δ LR)</span>
+                <span class="sample-count" id="decelFrontDiffSamples">0 samples</span>
+            </div>
+            <div id="decelFrontDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">REAR AXLE (Δ LR)</span>
+                <span class="sample-count" id="decelRearDiffSamples">0 samples</span>
+            </div>
+            <div id="decelRearDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">CENTER DIFF (Δ FR)</span>
+                <span class="sample-count" id="decelCenterDiffSamples">0 samples</span>
+            </div>
+            <div id="decelCenterDiffPlot" class="plot-container"></div>
+        </div>
+
+        <div class="header">
+            <h1>DYNAMOMETER</h1>
+            <div class="sub-text">125MS SETTLING DELAY • PHYSICS REJECTION • Z-SCORE OUTLIER • ASYMMETRIC ENVELOPE</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">ENGINE OUTPUT</span>
+                <span class="sample-count" id="dynoSamples">0 samples</span>
+            </div>
+            <div id="dynoPlot" class="plot-container tall"></div>
+        </div>
+
+        <div class="header">
+            <h1>GEMINI TUNING INTELLIGENCE</h1>
+            <div class="sub-text">AUTOMATED PHYSICS-BASED SLIDER RECOMMENDATIONS</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">RECOMMENDATIONS</span>
+                <span class="sample-count" id="drivetrainLabel">DRIVETRAIN: UNKNOWN</span>
+            </div>
+            <div id="geminiOutput" class="gemini-output">AWAITING TELEMETRY PARSE AND API KEY...</div>
+        </div>
+    </div>
+
+    <script type="module" src="src/telemetry.js"></script>
+</body>
+
+</html>
